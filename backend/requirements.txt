@@ -4,3 +4,4 @@ tinydb
 pydantic
 requests
 beautifulsoup4
+python-dateutil

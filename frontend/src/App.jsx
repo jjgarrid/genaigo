@@ -1,9 +1,18 @@
 import React from 'react';
 import './App.css';
-import Layout from './components/Layout';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import LandingPage from './pages/LandingPage'; // Changed back from StaticTestApp
+import SettingsPage from './pages/SettingsPage';
 
 function App() {
-  return <Layout />;
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/settings" element={<SettingsPage />} />
+      </Routes>
+    </Router>
+  );
 }
 
 export default App;
