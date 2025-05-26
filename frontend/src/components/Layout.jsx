@@ -3,13 +3,13 @@ import PropTypes from 'prop-types';
 import TopMenu from './TopMenu';
 import './Layout.css';
 
-const Layout = ({ children }) => {
+const Layout = ({ children, title, subtitle }) => {
   return (
     <div className="layout-root">
       <TopMenu />
       <main className="main-content">
-        <h1>Welcome to Genaigo Data Retrieval Platform</h1>
-        <p>This is your main workspace. Future widgets and controls will appear here.</p>
+        {title && <h1>{title}</h1>}
+        {subtitle && <p>{subtitle}</p>}
         {children}
       </main>
     </div>
@@ -17,7 +17,9 @@ const Layout = ({ children }) => {
 };
 
 Layout.propTypes = {
-  children: PropTypes.node
+  children: PropTypes.node,
+  title: PropTypes.string,
+  subtitle: PropTypes.string
 };
 
 export default Layout;

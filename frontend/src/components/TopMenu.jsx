@@ -7,13 +7,13 @@ const TopMenu = () => {
     <nav className="top-menu">
       <div className="menu-logo">Genaigo</div>
       <div className="menu-items">
+        <Link to="/" className="menu-item">Home</Link>
         <button className="menu-item">Dashboard</button>
         <button className="menu-item">Sources</button>
-        <button className="menu-item">Settings</button>
+        <Link to="/settings" className="menu-item">Settings</Link>
       </div>
       <div>
-        <Link to="/" style={{ marginRight: 16 }}>Home</Link>
-        <Link to="/settings">Settings</Link>
+        {/* Future user menu or other controls can go here */}
       </div>
     </nav>
   );
