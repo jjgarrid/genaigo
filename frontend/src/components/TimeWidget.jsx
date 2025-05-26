@@ -13,8 +13,14 @@ const TimeWidget = () => {
     console.log('Fetching server time...'); // Keep this for debugging
     try {
       setLoading(true);
-      // Use remote backend URL for fetch
-      const response = await fetch(`${apiBaseUrl}/api/time`); 
+      
+      // Sanitize the API base URL to prevent double slashes
+      const cleanBaseUrl = apiBaseUrl.replace(/\/+$/, ''); // Remove trailing slashes
+      const timeEndpoint = `${cleanBaseUrl}/api/time`;
+      
+      console.log('Making request to:', timeEndpoint); // Debug the final URL
+      
+      const response = await fetch(timeEndpoint); 
       
       if (!response.ok) {
         console.error('Fetch error:', response.status, response.statusText);
