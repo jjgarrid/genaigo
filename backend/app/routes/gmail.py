@@ -141,6 +141,17 @@ async def run_scheduler_now():
         logger.error(f"Failed to run scheduler job: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@router.post("/scheduler/analyze-now")
+async def run_analysis_now():
+    """Manually trigger email analysis immediately."""
+    try:
+        scheduler = get_scheduler()
+        result = scheduler.run_analysis_now()
+        return result
+    except Exception as e:
+        logger.error(f"Failed to run analysis job: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @router.get("/scheduler/logs", response_model=List[JobLog])
 async def get_scheduler_logs(limit: int = 10):
     """Get recent scheduler job logs."""

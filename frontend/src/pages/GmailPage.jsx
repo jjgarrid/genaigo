@@ -10,6 +10,9 @@ const GmailPage = () => {
   const [schedulerInfo, setSchedulerInfo] = useState(null);
   const [messages, setMessages] = useState([]);
   const [logs, setLogs] = useState([]);
+  const [analysisStats, setAnalysisStats] = useState(null);
+  const [processedEmails, setProcessedEmails] = useState([]);
+  const [processingSettings, setProcessingSettings] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('overview');
@@ -26,17 +29,21 @@ const GmailPage = () => {
     setError(null);
     
     try {
-      const [healthRes, configRes, statsRes, schedulerRes] = await Promise.all([
+      const [healthRes, configRes, statsRes, schedulerRes, analysisStatsRes, processingSettingsRes] = await Promise.all([
         fetch(`${apiBase}/health`),
         fetch(`${apiBase}/config`),
         fetch(`${apiBase}/stats`),
-        fetch(`${apiBase}/scheduler`)
+        fetch(`${apiBase}/scheduler`),
+        fetch(`${apiBaseUrl}/api/analysis/stats`),
+        fetch(`${apiBaseUrl}/api/processing/settings`)
       ]);
 
       setGmailHealth(await healthRes.json());
       setGmailConfig(await configRes.json());
       setGmailStats(await statsRes.json());
       setSchedulerInfo(await schedulerRes.json());
+      setAnalysisStats(await analysisStatsRes.json());
+      setProcessingSettings(await processingSettingsRes.json());
     } catch (err) {
       setError(`Failed to fetch data: ${err.message}`);
     } finally {
@@ -61,6 +68,16 @@ const GmailPage = () => {
       setLogs(data);
     } catch (err) {
       setError(`Failed to fetch logs: ${err.message}`);
+    }
+  };
+
+  const fetchProcessedEmails = async () => {
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/analysis/processed?limit=50`);
+      const data = await response.json();
+      setProcessedEmails(data.processed_emails || []);
+    } catch (err) {
+      setError(`Failed to fetch processed emails: ${err.message}`);
     }
   };
 
@@ -95,11 +112,49 @@ const GmailPage = () => {
     }
   };
 
+  const handleAnalyzeNow = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/process/emails/now`, { method: 'POST' });
+      const result = await response.json();
+      
+      if (result.status === 'success') {
+        alert(`Successfully analyzed ${result.processed} emails`);
+        fetchData();
+        if (activeTab === 'analysis') fetchProcessedEmails();
+      } else {
+        alert(`Analysis failed: ${result.message || 'Unknown error'}`);
+      }
+    } catch (err) {
+      alert(`Analysis failed: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRunAnalysisScheduler = async () => {
+    try {
+      const response = await fetch(`${apiBase}/scheduler/analyze-now`, { method: 'POST' });
+      const result = await response.json();
+      
+      if (result.status === 'success') {
+        alert(`Analysis completed: ${result.processed} emails processed`);
+        fetchData();
+      } else {
+        alert(`Analysis failed: ${result.message || 'Unknown error'}`);
+      }
+    } catch (err) {
+      alert(`Analysis failed: ${err.message}`);
+    }
+  };
+
   useEffect(() => {
     if (activeTab === 'messages') {
       fetchMessages();
     } else if (activeTab === 'logs') {
       fetchLogs();
+    } else if (activeTab === 'analysis') {
+      fetchProcessedEmails();
     }
   }, [activeTab]);
 
@@ -126,6 +181,25 @@ const GmailPage = () => {
             <span className="stat-label">Unique Senders</span>
             <span className="stat-value">{gmailStats?.unique_senders || 0}</span>
           </div>
+          <div className="stat">
+            <span className="stat-label">Analyzed</span>
+            <span className="stat-value">{analysisStats?.analyzed_messages || 0}</span>
+          </div>
+          <div className="stat">
+            <span className="stat-label">Analysis Coverage</span>
+            <span className="stat-value">{analysisStats?.analysis_coverage?.toFixed(1) || 0}%</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="card analysis-card">
+        <h3>AI Analysis Status</h3>
+        <div className={`status ${processingSettings?.auto_analysis_enabled ? 'healthy' : 'unhealthy'}`}>
+          {processingSettings?.auto_analysis_enabled ? '🤖 Auto Analysis Enabled' : '⏸ Auto Analysis Disabled'}
+        </div>
+        <div className="analysis-info">
+          <p><strong>Provider:</strong> {analysisStats?.analysis_provider || 'Not configured'}</p>
+          <p><strong>Unanalyzed:</strong> {analysisStats?.unanalyzed_messages || 0} messages</p>
         </div>
       </div>
 
@@ -163,7 +237,21 @@ const GmailPage = () => {
           disabled={loading || !gmailHealth?.configured}
           className="btn btn-primary"
         >
-          {loading ? 'Fetching...' : 'Fetch Now'}
+          {loading ? 'Fetching...' : 'Fetch Emails Now'}
+        </button>
+        <button 
+          onClick={handleAnalyzeNow}
+          disabled={loading}
+          className="btn btn-secondary"
+        >
+          {loading ? 'Analyzing...' : 'Analyze Emails Now'}
+        </button>
+        <button 
+          onClick={handleRunAnalysisScheduler}
+          disabled={loading}
+          className="btn btn-secondary"
+        >
+          Run Analysis Job
         </button>
         <button 
           onClick={fetchData}
@@ -296,6 +384,119 @@ const GmailPage = () => {
     </div>
   );
 
+  const renderAnalysis = () => (
+    <div className="analysis-section">
+      <div className="analysis-header">
+        <h3>Analyzed Emails ({processedEmails.length})</h3>
+        <div className="analysis-controls">
+          <button onClick={fetchProcessedEmails} className="btn btn-secondary">
+            Refresh
+          </button>
+          <button onClick={handleAnalyzeNow} className="btn btn-primary" disabled={loading}>
+            {loading ? 'Analyzing...' : 'Analyze All'}
+          </button>
+        </div>
+      </div>
+
+      <div className="analysis-stats-summary">
+        <div className="stat-card">
+          <span className="stat-label">Total Analyzed</span>
+          <span className="stat-value">{analysisStats?.analyzed_messages || 0}</span>
+        </div>
+        <div className="stat-card">
+          <span className="stat-label">Coverage</span>
+          <span className="stat-value">{analysisStats?.analysis_coverage?.toFixed(1) || 0}%</span>
+        </div>
+        <div className="stat-card">
+          <span className="stat-label">Provider</span>
+          <span className="stat-value">{analysisStats?.analysis_provider || 'N/A'}</span>
+        </div>
+        <div className="stat-card">
+          <span className="stat-label">Auto Processing</span>
+          <span className={`stat-value ${processingSettings?.auto_analysis_enabled ? 'enabled' : 'disabled'}`}>
+            {processingSettings?.auto_analysis_enabled ? 'ON' : 'OFF'}
+          </span>
+        </div>
+      </div>
+
+      <div className="processed-emails-list">
+        {processedEmails.map((email, index) => (
+          <div key={email.id || index} className="analysis-card">
+            <div className="email-header">
+              <div className="email-info">
+                <strong className="email-subject">{email.subject}</strong>
+                <span className="email-sender">From: {email.sender}</span>
+                <span className="email-date">{new Date(email.date).toLocaleString()}</span>
+              </div>
+              <div className="analysis-meta">
+                <span className="processed-date">
+                  Analyzed: {new Date(email.processed_at).toLocaleString()}
+                </span>
+                <span className="analysis-types">
+                  Types: {email.analysis_types?.join(', ') || 'N/A'}
+                </span>
+              </div>
+            </div>
+            
+            {email.analysis && (
+              <div className="analysis-results">
+                {email.analysis.entities && (
+                  <div className="analysis-section">
+                    <h4>Entities</h4>
+                    <div className="entities-grid">
+                      {email.analysis.entities.people && email.analysis.entities.people.length > 0 && (
+                        <div className="entity-group">
+                          <span className="entity-label">People:</span>
+                          <span className="entity-values">{email.analysis.entities.people.join(', ')}</span>
+                        </div>
+                      )}
+                      {email.analysis.entities.locations && email.analysis.entities.locations.length > 0 && (
+                        <div className="entity-group">
+                          <span className="entity-label">Locations:</span>
+                          <span className="entity-values">{email.analysis.entities.locations.join(', ')}</span>
+                        </div>
+                      )}
+                      {email.analysis.entities.events && email.analysis.entities.events.length > 0 && (
+                        <div className="entity-group">
+                          <span className="entity-label">Events:</span>
+                          <span className="entity-values">{email.analysis.entities.events.join(', ')}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+                
+                {email.analysis.summary && (
+                  <div className="analysis-section">
+                    <h4>Summary</h4>
+                    <p className="summary-text">{email.analysis.summary}</p>
+                  </div>
+                )}
+                
+                {email.analysis.category && (
+                  <div className="analysis-section">
+                    <h4>Category</h4>
+                    <span className={`category-tag category-${email.analysis.category.toLowerCase()}`}>
+                      {email.analysis.category}
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        ))}
+        {processedEmails.length === 0 && (
+          <div className="no-data">
+            <p>No analyzed emails found</p>
+            <button onClick={handleAnalyzeNow} className="btn btn-primary">
+              Start Analysis
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
   return (
     <Layout>
       <div className="gmail-page">
@@ -328,7 +529,13 @@ const GmailPage = () => {
             className={`tab ${activeTab === 'messages' ? 'active' : ''}`}
             onClick={() => setActiveTab('messages')}
           >
-            Messages
+            Messages ({gmailStats?.total_messages || 0})
+          </button>
+          <button 
+            className={`tab ${activeTab === 'analysis' ? 'active' : ''}`}
+            onClick={() => setActiveTab('analysis')}
+          >
+            Analysis ({analysisStats?.analyzed_messages || 0})
           </button>
           <button 
             className={`tab ${activeTab === 'logs' ? 'active' : ''}`}
@@ -343,6 +550,7 @@ const GmailPage = () => {
           {activeTab === 'overview' && renderOverview()}
           {activeTab === 'config' && renderConfiguration()}
           {activeTab === 'messages' && renderMessages()}
+          {activeTab === 'analysis' && renderAnalysis()}
           {activeTab === 'logs' && renderLogs()}
         </div>
       </div>

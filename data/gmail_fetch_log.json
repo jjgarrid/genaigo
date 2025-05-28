@@ -7,5 +7,26 @@
       "skipped": 47,
       "total_found": 47
     }
+  },
+  {
+    "timestamp": "2025-05-28T20:52:37.438432Z",
+    "result": {
+      "analysis_only": true,
+      "result": {
+        "status": "error",
+        "message": "Expecting value: line 1 column 1 (char 0)"
+      }
+    }
+  },
+  {
+    "timestamp": "2025-05-28T21:09:00.109118Z",
+    "result": {
+      "analysis_only": true,
+      "result": {
+        "status": "success",
+        "processed": 0,
+        "message": "No new messages to analyze"
+      }
+    }
   }
 ]

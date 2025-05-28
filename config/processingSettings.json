@@ -1,0 +1,22 @@
+{
+  "auto_analysis_enabled": true,
+  "analysis_provider": "deepseek",
+  "process_on_fetch": true,
+  "batch_size": 10,
+  "analysis_delay_minutes": 5,
+  "include_analysis_types": [
+    "entities",
+    "summary", 
+    "categorization"
+  ],
+  "priority_senders": [
+    "important@company.com",
+    "alerts@system.com"
+  ],
+  "skip_analysis_for": [
+    "automated",
+    "notifications",
+    "noreply",
+    "unsubscribe"
+  ]
+}

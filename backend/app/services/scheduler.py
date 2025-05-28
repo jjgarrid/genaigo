@@ -74,10 +74,39 @@ class GmailScheduler:
         """Execute the Gmail fetch job."""
         logger.info("Starting scheduled Gmail fetch job")
         try:
+            # First, fetch emails
             result = self.fetcher.fetch_recent_emails()
             logger.info(f"Gmail fetch job completed: {result}")
             
-            # Log results to a file for debugging
+            # Then, process emails with AI analysis if enabled
+            try:
+                from .email_processor import EmailProcessor
+                processor = EmailProcessor()
+                
+                # Check if auto-processing is enabled
+                if processor.processing_settings.get("process_on_fetch", True):
+                    logger.info("Starting automatic email analysis...")
+                    
+                    # Add a small delay to ensure fetch is complete
+                    delay_minutes = processor.processing_settings.get("analysis_delay_minutes", 5)
+                    if delay_minutes > 0:
+                        logger.info(f"Waiting {delay_minutes} minutes before starting analysis...")
+                        time.sleep(delay_minutes * 60)
+                    
+                    analysis_result = processor.process_unanalyzed_emails()
+                    logger.info(f"Email analysis completed: {analysis_result}")
+                    
+                    # Merge results
+                    result["analysis"] = analysis_result
+                else:
+                    logger.info("Automatic email analysis is disabled")
+                    result["analysis"] = {"status": "disabled"}
+                    
+            except Exception as e:
+                logger.error(f"Email analysis failed: {e}")
+                result["analysis"] = {"status": "error", "message": str(e)}
+            
+            # Log combined results
             self._log_job_result(result)
             
         except Exception as e:
@@ -125,6 +154,21 @@ class GmailScheduler:
         """Manually trigger the fetch job immediately."""
         logger.info("Manually triggering Gmail fetch job")
         return self._run_fetch_job()
+    
+    def run_analysis_now(self):
+        """Manually trigger email analysis immediately."""
+        logger.info("Manually triggering email analysis")
+        try:
+            from .email_processor import EmailProcessor
+            processor = EmailProcessor()
+            result = processor.process_unanalyzed_emails()
+            self._log_job_result({"analysis_only": True, "result": result})
+            return result
+        except Exception as e:
+            logger.error(f"Manual analysis failed: {e}")
+            error_result = {"status": "error", "message": str(e)}
+            self._log_job_result({"analysis_only": True, "result": error_result})
+            return error_result
         
     def get_next_run_time(self):
         """Get the next scheduled run time."""
