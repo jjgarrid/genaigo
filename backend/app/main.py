@@ -3,8 +3,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime
 from .routes.gmail import router as gmail_router
 from .routes.time import router as time_router
+from .routes.analyze import router as analyze_router
 from .services.scheduler import get_scheduler
 import logging
+import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -24,6 +30,7 @@ app.add_middleware(
 # Include routers
 app.include_router(gmail_router)
 app.include_router(time_router, prefix="/api")
+app.include_router(analyze_router)
 
 @app.on_event("startup")
 async def startup_event():
@@ -55,5 +62,4 @@ def get_current_time_legacy():
     """
     Returns the current server time in ISO format (legacy endpoint)
     """
-    return {"time": datetime.utcnow().isoformat() + "Z"}
     return {"time": datetime.utcnow().isoformat() + "Z"}

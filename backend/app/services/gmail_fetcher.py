@@ -1,3 +1,16 @@
+# Utility for analysis lookup
+from tinydb import where
+
+def get_analysis_report_by_id(record_id: str):
+    """
+    Retrieve analysis report for a Gmail message by ID from TinyDB.
+    """
+    db_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), 'data', 'db.json')
+    db = TinyDB(db_path)
+    result = db.table("gmail_analysis").get(where("id") == record_id)
+    if result:
+        return result.get("report")
+    return None
 import json
 import os
 import hashlib
