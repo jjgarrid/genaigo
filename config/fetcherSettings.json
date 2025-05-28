@@ -23,7 +23,8 @@
     "alert@email.politico.com",
     "noreply-randcontacts@rand.org",
     "newsletters@e.economist.com",
-    "newsletters-noreply@linkedin.com"
+    "newsletters-noreply@linkedin.com",
+    "newsletter@newsletter.luxtimes.lu"
   ],
   "schedule": "0 2 * * *",
   "storage_path": "../data/messages.json",
