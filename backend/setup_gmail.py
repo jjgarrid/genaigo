@@ -27,7 +27,7 @@ SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
 def setup_gmail_credentials():
     """Set up Gmail OAuth2 credentials."""
     
-    config_dir = os.path.join(os.path.dirname(__file__), '..', '..', 'config')
+    config_dir = os.path.join(os.path.dirname(__file__), '..', 'config')
     gmail_config_path = os.path.join(config_dir, 'gmail.json')
     
     print("Gmail OAuth2 Setup")

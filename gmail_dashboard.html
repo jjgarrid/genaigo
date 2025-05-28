@@ -116,7 +116,24 @@
     </div>
 
     <script>
-        const API_BASE = 'http://localhost:8000/api/gmail';
+        // Environment-aware API configuration
+        const getApiBase = () => {
+            // Check if we're in a GitHub Codespace
+            if (window.location.hostname.includes('app.github.dev')) {
+                // Since this is a file:// URL, we need to detect the codespace URL differently
+                // We'll try to get it from the current page URL or construct it
+                const codespaceUrl = window.location.href.includes('file://') ? 
+                    'https://crispy-guide-545j7w5vpg53p7xp-8000.app.github.dev' :
+                    window.location.protocol + '//' + window.location.hostname.replace('-5173.', '-8000.');
+                return `${codespaceUrl}/api/gmail`;
+            }
+            
+            // Default to localhost for local development
+            return 'http://localhost:8000/api/gmail';
+        };
+
+        const API_BASE = getApiBase();
+        console.log('Gmail Dashboard API Base:', API_BASE);
 
         async function fetchAPI(endpoint, options = {}) {
             try {

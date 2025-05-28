@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
+import { useApiConfig } from '../contexts/ApiConfigContext';
 import './GmailPage.css';
 
 const GmailPage = () => {
@@ -13,7 +14,8 @@ const GmailPage = () => {
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('overview');
 
-  const apiBase = 'http://localhost:8000/api/gmail';
+  const { apiBaseUrl } = useApiConfig();
+  const apiBase = `${apiBaseUrl.replace(/\/+$/, '')}/api/gmail`;
 
   useEffect(() => {
     fetchData();

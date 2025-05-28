@@ -1,8 +1,9 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { API_BASE_ROOT } from '../config/api';
 
 const ApiConfigContext = createContext();
 
-const DEFAULT_API_URL = 'https://automatic-chainsaw-9qwrgpw654xcpxjg-8001.app.github.dev';
+const DEFAULT_API_URL = API_BASE_ROOT;
 const STORAGE_KEY = 'genaigo_api_base_url';
 
 // Helper function to sanitize API URL

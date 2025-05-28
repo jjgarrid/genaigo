@@ -1,0 +1,21 @@
+{
+  "name": "genaigo",
+  "version": "1.0.0",
+  "description": "GenAI Go - Email Integration Platform",
+  "scripts": {
+    "start": "./start.sh",
+    "start:dev": "concurrently \"cd backend && python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload\" \"cd frontend && npm run dev -- --host 0.0.0.0 --port 5173\"",
+    "setup": "cd backend && pip install -r requirements.txt && cd ../frontend && npm install",
+    "setup:gmail": "cd backend && python setup_gmail.py",
+    "test": "cd backend && python ../test_gmail_integration.py",
+    "backend": "cd backend && python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload",
+    "frontend": "cd frontend && npm run dev -- --host 0.0.0.0 --port 5173",
+    "build": "cd frontend && npm run build"
+  },
+  "devDependencies": {
+    "concurrently": "^7.6.0"
+  },
+  "keywords": ["gmail", "integration", "fastapi", "react", "automation"],
+  "author": "GenAI Go Team",
+  "license": "MIT"
+}
