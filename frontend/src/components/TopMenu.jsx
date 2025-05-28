@@ -9,6 +9,7 @@ const TopMenu = () => {
       <div className="menu-items">
         <Link to="/" className="menu-item">Home</Link>
         <button className="menu-item">Dashboard</button>
+        <Link to="/gmail" className="menu-item">Gmail</Link>
         <button className="menu-item">Sources</button>
         <Link to="/settings" className="menu-item">Settings</Link>
       </div>

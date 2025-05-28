@@ -1,0 +1,11 @@
+{
+  "sender_whitelist": [
+    "alice@example.com",
+    "alerts@service.io",
+    "notifications@github.com"
+  ],
+  "schedule": "0 2 * * *",
+  "storage_path": "../data/messages.json",
+  "enabled": true,
+  "lookback_hours": 24
+}

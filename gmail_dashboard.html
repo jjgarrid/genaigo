@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gmail Integration Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .status {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            display: inline-block;
+            margin: 8px;
+        }
+        .status.healthy { background-color: #e8f5e8; color: #2e7d32; }
+        .status.unhealthy { background-color: #ffebee; color: #c62828; }
+        .status.running { background-color: #e3f2fd; color: #1976d2; }
+        .status.stopped { background-color: #fafafa; color: #757575; }
+        .btn {
+            background-color: #2196f3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 8px;
+            font-weight: 600;
+        }
+        .btn:hover { background-color: #1976d2; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .error { color: #c62828; background-color: #ffebee; padding: 12px; border-radius: 8px; }
+        .success { color: #2e7d32; background-color: #e8f5e8; padding: 12px; border-radius: 8px; }
+        .info { color: #1976d2; background-color: #e3f2fd; padding: 12px; border-radius: 8px; }
+        .stats { display: flex; justify-content: space-around; }
+        .stat { text-align: center; }
+        .stat-value { font-size: 24px; font-weight: 700; color: #333; }
+        .stat-label { font-size: 14px; color: #666; }
+        pre { background-color: #f5f5f5; padding: 12px; border-radius: 8px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Gmail Integration Dashboard</h1>
+        <p>Monitor and control automated email fetching</p>
+    </div>
+
+    <div class="container">
+        <h2>Quick Actions</h2>
+        <button class="btn" onclick="fetchNow()">Fetch Emails Now</button>
+        <button class="btn" onclick="startScheduler()">Start Scheduler</button>
+        <button class="btn" onclick="stopScheduler()">Stop Scheduler</button>
+        <button class="btn" onclick="refreshData()">Refresh All Data</button>
+    </div>
+
+    <div class="grid">
+        <div class="container">
+            <h3>Gmail Connection Status</h3>
+            <div id="gmailStatus">Loading...</div>
+            <div id="gmailError"></div>
+        </div>
+
+        <div class="container">
+            <h3>Message Statistics</h3>
+            <div id="stats" class="stats">Loading...</div>
+        </div>
+
+        <div class="container">
+            <h3>Scheduler Status</h3>
+            <div id="schedulerStatus">Loading...</div>
+        </div>
+
+        <div class="container">
+            <h3>Configuration</h3>
+            <div id="config">Loading...</div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h3>Recent Messages</h3>
+        <button class="btn" onclick="loadMessages()">Load Messages</button>
+        <div id="messages"></div>
+    </div>
+
+    <div class="container">
+        <h3>Execution Logs</h3>
+        <button class="btn" onclick="loadLogs()">Load Logs</button>
+        <div id="logs"></div>
+    </div>
+
+    <div class="container">
+        <h3>Raw API Responses</h3>
+        <div id="debug"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000/api/gmail';
+
+        async function fetchAPI(endpoint, options = {}) {
+            try {
+                const response = await fetch(`${API_BASE}${endpoint}`, options);
+                return await response.json();
+            } catch (error) {
+                console.error('API Error:', error);
+                return { error: error.message };
+            }
+        }
+
+        async function loadGmailStatus() {
+            const health = await fetchAPI('/health');
+            const statusEl = document.getElementById('gmailStatus');
+            const errorEl = document.getElementById('gmailError');
+
+            if (health.error) {
+                statusEl.innerHTML = `<div class="error">API Error: ${health.error}</div>`;
+                return;
+            }
+
+            const statusClass = health.configured ? 'healthy' : 'unhealthy';
+            const statusText = health.configured ? '✓ Connected' : '⚠ Not Configured';
+            statusEl.innerHTML = `<div class="status ${statusClass}">${statusText}</div>`;
+
+            if (health.error) {
+                errorEl.innerHTML = `<div class="error">${health.error}</div>`;
+            } else {
+                errorEl.innerHTML = '';
+            }
+        }
+
+        async function loadStats() {
+            const stats = await fetchAPI('/stats');
+            const statsEl = document.getElementById('stats');
+
+            if (stats.error) {
+                statsEl.innerHTML = `<div class="error">Error loading stats: ${stats.error}</div>`;
+                return;
+            }
+
+            statsEl.innerHTML = `
+                <div class="stat">
+                    <div class="stat-value">${stats.total_messages || 0}</div>
+                    <div class="stat-label">Total Messages</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">${stats.unique_senders || 0}</div>
+                    <div class="stat-label">Unique Senders</div>
+                </div>
+            `;
+        }
+
+        async function loadSchedulerStatus() {
+            const scheduler = await fetchAPI('/scheduler');
+            const statusEl = document.getElementById('schedulerStatus');
+
+            if (scheduler.error) {
+                statusEl.innerHTML = `<div class="error">Error loading scheduler: ${scheduler.error}</div>`;
+                return;
+            }
+
+            const statusClass = scheduler.running ? 'running' : 'stopped';
+            const statusText = scheduler.running ? '⏰ Running' : '⏸ Stopped';
+            
+            let nextRun = '';
+            if (scheduler.next_run_time) {
+                nextRun = `<br>Next run: ${new Date(scheduler.next_run_time).toLocaleString()}`;
+            }
+
+            statusEl.innerHTML = `
+                <div class="status ${statusClass}">${statusText}</div>
+                <p>Schedule: ${scheduler.schedule || 'Not set'}${nextRun}</p>
+            `;
+        }
+
+        async function loadConfig() {
+            const config = await fetchAPI('/config');
+            const configEl = document.getElementById('config');
+
+            if (config.error) {
+                configEl.innerHTML = `<div class="error">Error loading config: ${config.error}</div>`;
+                return;
+            }
+
+            const credsStatus = config.credentials_configured ? 
+                '<span style="color: #2e7d32;">✓ Configured</span>' : 
+                '<span style="color: #c62828;">⚠ Not Configured</span>';
+
+            configEl.innerHTML = `
+                <p><strong>Credentials:</strong> ${credsStatus}</p>
+                <p><strong>Enabled:</strong> ${config.settings.enabled ? 'Yes' : 'No'}</p>
+                <p><strong>Whitelist:</strong> ${config.settings.sender_whitelist.length} addresses</p>
+                <p><strong>Schedule:</strong> ${config.settings.schedule}</p>
+            `;
+        }
+
+        async function loadMessages() {
+            const messages = await fetchAPI('/messages?limit=10');
+            const messagesEl = document.getElementById('messages');
+
+            if (messages.error) {
+                messagesEl.innerHTML = `<div class="error">Error loading messages: ${messages.error}</div>`;
+                return;
+            }
+
+            if (!Array.isArray(messages) || messages.length === 0) {
+                messagesEl.innerHTML = '<div class="info">No messages found</div>';
+                return;
+            }
+
+            const messagesHtml = messages.map(msg => `
+                <div style="border: 1px solid #ddd; padding: 12px; margin: 8px 0; border-radius: 8px;">
+                    <strong>${msg.subject}</strong><br>
+                    <small>From: ${msg.sender} | ${new Date(msg.retrievalTimestamp).toLocaleString()}</small><br>
+                    <div style="background: #f5f5f5; padding: 8px; margin-top: 8px; border-radius: 4px;">
+                        ${msg.body.substring(0, 200)}${msg.body.length > 200 ? '...' : ''}
+                    </div>
+                </div>
+            `).join('');
+
+            messagesEl.innerHTML = messagesHtml;
+        }
+
+        async function loadLogs() {
+            const logs = await fetchAPI('/scheduler/logs?limit=10');
+            const logsEl = document.getElementById('logs');
+
+            if (logs.error) {
+                logsEl.innerHTML = `<div class="error">Error loading logs: ${logs.error}</div>`;
+                return;
+            }
+
+            if (!Array.isArray(logs) || logs.length === 0) {
+                logsEl.innerHTML = '<div class="info">No logs found</div>';
+                return;
+            }
+
+            const logsHtml = logs.map(log => `
+                <div style="border: 1px solid #ddd; padding: 12px; margin: 8px 0; border-radius: 8px;">
+                    <strong>${new Date(log.timestamp).toLocaleString()}</strong> - 
+                    <span class="status status-${log.result.status}">${log.result.status}</span><br>
+                    ${log.result.processed !== undefined ? `Processed: ${log.result.processed} | ` : ''}
+                    ${log.result.skipped !== undefined ? `Skipped: ${log.result.skipped} | ` : ''}
+                    ${log.result.total_found !== undefined ? `Found: ${log.result.total_found}` : ''}
+                    ${log.result.message ? `<br><span style="color: #c62828;">Error: ${log.result.message}</span>` : ''}
+                </div>
+            `).join('');
+
+            logsEl.innerHTML = logsHtml;
+        }
+
+        async function fetchNow() {
+            const result = await fetchAPI('/fetch', { method: 'POST' });
+            const debugEl = document.getElementById('debug');
+            
+            if (result.error) {
+                debugEl.innerHTML = `<div class="error">Fetch failed: ${result.error}</div>`;
+            } else if (result.status === 'success') {
+                debugEl.innerHTML = `<div class="success">Fetch successful! Processed ${result.processed} new messages</div>`;
+                refreshData();
+            } else {
+                debugEl.innerHTML = `<div class="error">Fetch failed: ${result.message || 'Unknown error'}</div>`;
+            }
+        }
+
+        async function startScheduler() {
+            const result = await fetchAPI('/scheduler/start', { method: 'POST' });
+            const debugEl = document.getElementById('debug');
+            
+            if (result.error) {
+                debugEl.innerHTML = `<div class="error">Start failed: ${result.error}</div>`;
+            } else {
+                debugEl.innerHTML = `<div class="success">${result.message}</div>`;
+                loadSchedulerStatus();
+            }
+        }
+
+        async function stopScheduler() {
+            const result = await fetchAPI('/scheduler/stop', { method: 'POST' });
+            const debugEl = document.getElementById('debug');
+            
+            if (result.error) {
+                debugEl.innerHTML = `<div class="error">Stop failed: ${result.error}</div>`;
+            } else {
+                debugEl.innerHTML = `<div class="success">${result.message}</div>`;
+                loadSchedulerStatus();
+            }
+        }
+
+        async function refreshData() {
+            await Promise.all([
+                loadGmailStatus(),
+                loadStats(),
+                loadSchedulerStatus(),
+                loadConfig()
+            ]);
+        }
+
+        // Load initial data
+        refreshData();
+    </script>
+</body>
+</html>
