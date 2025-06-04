@@ -76,13 +76,16 @@ class GmailScheduler:
         try:
             result = self.fetcher.fetch_recent_emails()
             logger.info(f"Gmail fetch job completed: {result}")
-            
+
             # Log results to a file for debugging
             self._log_job_result(result)
-            
+            return result
+
         except Exception as e:
             logger.error(f"Gmail fetch job failed: {e}")
-            self._log_job_result({'status': 'error', 'message': str(e)})
+            error_result = {'status': 'error', 'message': str(e)}
+            self._log_job_result(error_result)
+            return error_result
             
     def _log_job_result(self, result: dict):
         """Log job results to a file."""

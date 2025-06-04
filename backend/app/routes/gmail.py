@@ -133,9 +133,6 @@ async def run_scheduler_now():
     try:
         scheduler = get_scheduler()
         result = scheduler.run_now()
-        # The run_now method doesn't return a value, so we need to call the fetcher directly
-        fetcher = GmailFetcher()
-        result = fetcher.fetch_recent_emails()
         return FetchResult(**result)
     except Exception as e:
         logger.error(f"Failed to run scheduler job: {e}")
