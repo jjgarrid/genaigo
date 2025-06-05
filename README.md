@@ -288,7 +288,7 @@ genaigo/
 │   ├── gmail.json        # Gmail OAuth2 credentials
 │   └── fetcherSettings.json # Email fetcher settings
 └── data/                 # Stored data
-    ├── messages.json     # Email messages database
+    ├── db.json           # Application database
     └── gmail_fetch_log.json # Execution logs
 ```
 
