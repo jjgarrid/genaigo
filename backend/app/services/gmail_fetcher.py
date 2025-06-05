@@ -114,16 +114,12 @@ class GmailFetcher:
             json.dump(self.gmail_config, f, indent=2)
             
     def _get_messages_db(self) -> TinyDB:
-        """Get or create the messages database."""
-        storage_path = self.fetcher_settings.get('storage_path', '../data/messages.json')
-        if storage_path.startswith('../'):
-            # Convert relative path to absolute
-            db_path = os.path.join(self.data_dir, storage_path.replace('../data/', ''))
-        else:
-            db_path = storage_path
-            
-        os.makedirs(os.path.dirname(db_path), exist_ok=True)
-        return TinyDB(db_path)
+        """Return the TinyDB table used for storing Gmail messages."""
+        # Use the same database as the rest of the application
+        from app.config import get_db
+
+        db = get_db()
+        return db.table("gmail_messages")
         
     def _build_search_query(self) -> str:
         """Build Gmail search query for recent messages."""

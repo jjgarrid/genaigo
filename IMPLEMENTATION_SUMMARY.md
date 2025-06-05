@@ -22,7 +22,7 @@ I have successfully implemented a comprehensive Gmail integration system for the
 ### Data Processing & Storage
 - ✅ Extracts all required fields: `messageId`, `subject`, `sender`, `date`, `retrievalTimestamp`, `body`, `bodyHash`
 - ✅ SHA-256 hash of body content for deduplication
-- ✅ TinyDB JSON database storage (`/data/messages.json`)
+- ✅ TinyDB JSON database storage (`/data/db.json`)
 - ✅ Prevents duplicate entries by messageId
 
 ### Configuration
@@ -92,7 +92,7 @@ backend/
     "notifications@github.com"
   ],
   "schedule": "0 2 * * *",
-  "storage_path": "../data/messages.json",
+  "storage_path": "../data/db.json",
   "enabled": true,
   "lookback_hours": 24
 }
@@ -115,7 +115,7 @@ backend/
 
 ## 📊 Data Storage Schema
 
-Messages are stored in `/data/messages.json` with this structure:
+Messages are stored in `/data/db.json` with this structure:
 
 ```json
 {

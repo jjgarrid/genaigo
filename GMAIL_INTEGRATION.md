@@ -70,7 +70,7 @@ Edit `/config/fetcherSettings.json`:
     "notifications@github.com"
   ],
   "schedule": "0 2 * * *",
-  "storage_path": "../data/messages.json",
+  "storage_path": "../data/db.json",
   "enabled": true,
   "lookback_hours": 24
 }
@@ -137,7 +137,7 @@ Get current configuration (without sensitive data).
 
 ## Data Storage
 
-Messages are stored in `/data/messages.json` with the following structure:
+Messages are stored in `/data/db.json` with the following structure:
 
 ```json
 {
