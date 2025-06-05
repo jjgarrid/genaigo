@@ -56,4 +56,3 @@ def get_current_time_legacy():
     Returns the current server time in ISO format (legacy endpoint)
     """
     return {"time": datetime.utcnow().isoformat() + "Z"}
-    return {"time": datetime.utcnow().isoformat() + "Z"}
