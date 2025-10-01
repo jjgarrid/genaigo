@@ -1,9 +1,9 @@
 {
   "gmail_credentials": {
-    "client_id": "126028120403-58khjgd3vjvrj1fv1bi0p5vb8gg0k1vf.apps.googleusercontent.com",
-    "client_secret": "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",
-    "refresh_token": "1//09TLDIQyO48g3CgYIARAAGAkSNwF-L9Ir-mWuKnatsyRKm5hwAUWPKNlXjCG6CoOHKUu0yraGTwNO0Ysr-Ep83D698-ixbURQ564",
-    "access_token": "ya29.a0AW4Xtxh5Yju7c28vt29nBAZGSzLt_uHJAHYlMOOnSvgXV_PpQq5QrSwX8a8a4lBDhIddS4X7PanhrSY_6yfASeS9-vxuZcIZBN_jkGzlc3C97d1o_Qv7MymhtPNapzfFpMqSSnwdg_IVtCBKbfNDtwuZN2hHawOWu5SlSTuXaCgYKAVUSARESFQHGX2MiJuGWd0_iYvkNYN8XskucKw0175",
+    "client_id": "",
+    "client_secret": "",
+    "refresh_token": "",
+    "access_token": "",
     "token_expiry": "2025-05-28T15:01:41.820137"
   },
   "note": "Fill in your OAuth2 credentials here. You can generate these from Google Cloud Console."
