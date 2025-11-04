@@ -1,158 +1,102 @@
 # User Guide
 
-## Getting Started
+This guide explains how to set up and use the GenAI Go Email Integration Platform.
 
-### Prerequisites
-- Gmail account
-- Web browser (Chrome, Firefox, Safari, or Edge)
+## 🚀 Getting Started
 
-### Initial Setup
+This guide assumes you are running the application from a pre-built package or have completed the steps in the [Development Guide](development.md).
 
-1. **Start the Application**
-   - Run the startup script:
-     - Linux/Mac: `./start.sh`
-     - Windows: `start.bat`
-   - Or use npm: `npm run start`
+### 1. Start the Application
+Use the recommended startup script, which handles everything from dependency installation to server startup.
 
-2. **Configure Gmail Integration**
-   - Open the web interface at http://localhost:5173
-   - Navigate to the Gmail page
-   - If credentials are not configured, follow the setup instructions:
-     - Run `python backend/setup_gmail.py` from the project root
-     - Follow the OAuth2 authorization process
-     - The application will automatically fetch emails based on your configuration
+-   **Linux/Mac**:
+    ```bash
+    ./start.sh
+    ```
+-   **Windows**:
+    ```cmd
+    start.bat
+    ```
+-   **Using npm**:
+    ```bash
+    npm run start
+    ```
 
-## Web Interface
+### 2. Access the Web Interface
+Once the application is running, open your web browser and navigate to:
+`http://localhost:5173`
 
-### Dashboard
-The main dashboard shows:
-- Current system time
-- Quick access to different sections
+### 3. Configure Gmail (First-Time Setup)
+If this is your first time running the application, you will need to authorize it to access your Gmail account.
+
+1.  From the project's root directory, run the guided setup script:
+    ```bash
+    npm run setup:gmail
+    ```
+2.  Follow the on-screen prompts, which will open a browser window for you to sign in to your Google account and grant the necessary permissions.
+3.  Once authorized, the application will be ready to fetch emails.
+
+## 🖥️ Web Interface
+
+The web interface provides a complete dashboard for managing the Gmail integration.
 
 ### Gmail Integration Page
-This page provides comprehensive Gmail integration management:
+This is the main control center for the application, with four key tabs:
 
 #### Overview Tab
-- **Gmail Connection Status**: Shows if the Gmail API is properly connected
-- **Message Statistics**: Displays total messages and unique senders
-- **Scheduler Status**: Shows if the automated scheduler is running
-- **Manual Actions**: Allows you to manually fetch emails or refresh data
+-   **Status Panels**: At-a-glance status of the Gmail connection, message database, and scheduler.
+-   **Manual Actions**: Buttons to trigger an immediate email fetch or to start/stop the automated scheduler.
 
 #### Configuration Tab
-- **Current Configuration**: Displays your current settings
-- **Sender Whitelist**: Shows which email addresses are being monitored
-- **Schedule**: Displays the current fetch schedule (cron format)
-- **Setup Instructions**: If credentials aren't configured, shows how to set them up
+-   **Current Settings**: A read-only view of the current configuration, including the sender whitelist, cron schedule, and other parameters.
+-   **Setup Instructions**: Reminders on how to run the setup script if credentials are not configured.
 
 #### Messages Tab
-- **Recent Messages**: Displays the most recently fetched emails
-- **Message Details**: Shows subject, sender, date, and a preview of the body
+-   **Message List**: A searchable and sortable list of all emails that have been fetched and stored.
+-   **Message Details**: Click on a message to view its full body content, sender, subject, and date.
 
 #### Logs Tab
-- **Execution Logs**: Shows the history of email fetch operations
-- **Status Information**: Displays success/failure status and processing statistics
+-   **Execution History**: A log of every time the scheduler has run, showing the outcome (e.g., `success`, `failure`) and how many messages were processed.
 
-### Settings Page
-- Configure application settings
-- Manage API connections
-- Adjust fetch parameters
+## ⚙️ Configuration
 
-## Configuration
+All configuration is managed through files located in the `config/` directory.
 
 ### Sender Whitelist
-The sender whitelist determines which emails are fetched from your Gmail account. Only emails from addresses in this list will be processed.
+This is the most important setting. It's a list of email addresses that the application is allowed to fetch emails from. Any email not from a sender in this list will be ignored.
 
-To modify the whitelist:
-1. Edit `config/fetcherSettings.json`
-2. Add or remove email addresses from the `sender_whitelist` array
-3. Restart the application or refresh the configuration via the web interface
+1.  Open `config/fetcherSettings.json`.
+2.  Add or remove email addresses from the `sender_whitelist` array:
+    ```json
+    "sender_whitelist": [
+      "alerts@my-service.com",
+      "newsletter@company.com"
+    ]
+    ```
+3.  The application will automatically apply the changes on the next scheduled run.
 
 ### Fetch Schedule
-The fetch schedule determines how often the application checks for new emails. It uses cron format:
+This setting controls how often the application automatically checks for new emails. It uses a standard cron expression.
 
-- `0 2 * * *` - Daily at 2:00 AM (default)
-- `0 */6 * * *` - Every 6 hours
-- `0 0 * * 0` - Weekly on Sunday at midnight
+1.  Open `config/fetcherSettings.json`.
+2.  Modify the `schedule` value.
+    -   `"0 2 * * *"`: Daily at 2:00 AM (default).
+    -   `"0 */6 * * *"`: Every 6 hours.
+    -   `"*/30 * * * *"`: Every 30 minutes.
 
-To modify the schedule:
-1. Edit `config/fetcherSettings.json`
-2. Change the `schedule` value to your desired cron expression
-3. Restart the application or refresh the configuration via the web interface
+## 🔒 Security and Data Privacy
 
-### Lookback Period
-The lookback period determines how far back in time the application will search for emails.
+-   **Local First**: All your data, including emails and credentials, is stored locally on your machine in the `data/` and `config/` directories.
+-   **Read-Only Access**: The application only requests permission to read your emails. It will never modify, send, or delete anything in your Gmail account.
+-   **Secure Authentication**: The connection to Gmail is secured using the industry-standard OAuth2 protocol.
 
-To modify the lookback period:
-1. Edit `config/fetcherSettings.json`
-2. Change the `lookback_hours` value (default: 24)
-3. Restart the application or refresh the configuration via the web interface
+##  troubleshooting
 
-## Manual Operations
+### "Gmail credentials not configured"
+This means the application hasn't been authorized yet. Run `npm run setup:gmail` from the project root and follow the prompts.
 
-### Manual Fetch
-To manually fetch emails:
-1. Navigate to the Gmail page
-2. Go to the Overview tab
-3. Click the "Fetch Now" button
-4. The application will immediately check for new emails
-
-### Scheduler Control
-To start or stop the automated scheduler:
-1. Navigate to the Gmail page
-2. Go to the Overview tab
-3. Use the Start/Stop buttons in the Scheduler Status section
-
-## Troubleshooting
-
-### Common Issues
-
-#### "Gmail credentials not configured"
-- Run `python backend/setup_gmail.py` to configure OAuth2 credentials
-- Follow the authorization process in your web browser
-
-#### "No messages found"
-- Check that your sender whitelist includes addresses that have sent you emails
-- Verify that emails exist in the specified time range
-- Check Gmail API quota limits if this is a recurring issue
-
-#### "Port already in use"
-- The startup script should automatically kill existing processes
-- If issues persist, manually kill processes using ports 8000 and 5173:
-  - Linux/Mac: `pkill -f "uvicorn|vite"`
-  - Windows: Use Task Manager to end processes
-
-### Checking Logs
-- **Application Logs**: Visible in the terminal where you started the application
-- **Execution Logs**: Available in the Logs tab of the Gmail page
-- **Data Storage**: Check `data/messages.json` for stored email data
-
-## Data Management
-
-### Stored Data
-Email data is stored in `data/messages.json` in JSON format. Each email includes:
-- Message ID
-- Subject
-- Sender
-- Date
-- Retrieval timestamp
-- Body content
-- Body hash (for deduplication)
-
-### Data Privacy
-- All data is stored locally on your machine
-- No data is transmitted to external servers
-- Gmail access is read-only
-- Emails remain unchanged in your Gmail account
-
-## Security
-
-### OAuth2 Authentication
-The application uses secure OAuth2 authentication with Google:
-- Minimal permissions (read-only access to Gmail)
-- Tokens are stored locally
-- Automatic token refresh when needed
-
-### Data Protection
-- All data remains on your local machine
-- Configuration files contain sensitive information and should be protected
-- The application does not modify your Gmail messages
+### "No messages found"
+This is usually due to one of the following:
+-   The `sender_whitelist` in `config/fetcherSettings.json` is empty or doesn't contain the correct sender emails.
+-   There are no new emails from whitelisted senders within the `lookback_hours` window (default is 24 hours).
+-   There's an issue with your Gmail API connection. Check the application logs in your terminal for any error messages.
