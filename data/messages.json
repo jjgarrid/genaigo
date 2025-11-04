@@ -1,1 +1,1 @@
-Empty
+{"_default": {"1": {"messageId": "test-1762245349", "subject": "Test Message", "sender": "test@example.com", "date": "2025-11-04T08:35:49.652973", "retrievalTimestamp": "2025-11-04T08:35:49.652982Z", "body": "This is a test message", "bodyHash": "test-hash"}}}
