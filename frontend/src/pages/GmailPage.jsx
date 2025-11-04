@@ -3,6 +3,16 @@ import Layout from '../components/Layout';
 import { useApiConfig } from '../contexts/ApiConfigContext';
 import './GmailPage.css';
 
+// A new Card component for consistent styling
+const Card = ({ title, children, className = '' }) => (
+  <div className={`card ${className}`}>
+    {title && <h3 className="card-title">{title}</h3>}
+    <div className="card-content">
+      {children}
+    </div>
+  </div>
+);
+
 const GmailPage = () => {
   const [gmailHealth, setGmailHealth] = useState(null);
   const [gmailConfig, setGmailConfig] = useState(null);
@@ -105,18 +115,14 @@ const GmailPage = () => {
 
   const renderOverview = () => (
     <div className="overview-grid">
-      <div className="card health-card">
-        <h3>Gmail Connection</h3>
+      <Card title="Gmail Connection" className="health-card">
         <div className={`status ${gmailHealth?.configured ? 'healthy' : 'unhealthy'}`}>
           {gmailHealth?.configured ? '✓ Connected' : '⚠ Not Configured'}
         </div>
-        {gmailHealth?.error && (
-          <p className="error-text">{gmailHealth.error}</p>
-        )}
-      </div>
+        {gmailHealth?.error && <p className="error-text">{gmailHealth.error}</p>}
+      </Card>
 
-      <div className="card stats-card">
-        <h3>Message Statistics</h3>
+      <Card title="Message Statistics" className="stats-card">
         <div className="stats-grid">
           <div className="stat">
             <span className="stat-label">Total Messages</span>
@@ -127,10 +133,9 @@ const GmailPage = () => {
             <span className="stat-value">{gmailStats?.unique_senders || 0}</span>
           </div>
         </div>
-      </div>
+      </Card>
 
-      <div className="card scheduler-card">
-        <h3>Scheduler Status</h3>
+      <Card title="Scheduler Status" className="scheduler-card">
         <div className={`status ${schedulerInfo?.running ? 'running' : 'stopped'}`}>
           {schedulerInfo?.running ? '⏰ Running' : '⏸ Stopped'}
         </div>
@@ -139,46 +144,29 @@ const GmailPage = () => {
           <p>Next run: {new Date(schedulerInfo.next_run_time).toLocaleString()}</p>
         )}
         <div className="scheduler-controls">
-          <button 
-            onClick={() => handleSchedulerToggle('start')}
-            disabled={schedulerInfo?.running}
-            className="btn btn-primary"
-          >
+          <button onClick={() => handleSchedulerToggle('start')} disabled={schedulerInfo?.running} className="btn btn-primary">
             Start
           </button>
-          <button 
-            onClick={() => handleSchedulerToggle('stop')}
-            disabled={!schedulerInfo?.running}
-            className="btn btn-secondary"
-          >
+          <button onClick={() => handleSchedulerToggle('stop')} disabled={!schedulerInfo?.running} className="btn btn-secondary">
             Stop
           </button>
         </div>
-      </div>
+      </Card>
 
-      <div className="card actions-card">
-        <h3>Manual Actions</h3>
-        <button 
-          onClick={handleFetchNow}
-          disabled={loading || !gmailHealth?.configured}
-          className="btn btn-primary"
-        >
+      <Card title="Manual Actions" className="actions-card">
+        <button onClick={handleFetchNow} disabled={loading || !gmailHealth?.configured} className="btn btn-primary">
           {loading ? 'Fetching...' : 'Fetch Now'}
         </button>
-        <button 
-          onClick={fetchData}
-          className="btn btn-secondary"
-        >
+        <button onClick={fetchData} className="btn btn-secondary">
           Refresh Data
         </button>
-      </div>
+      </Card>
     </div>
   );
 
   const renderConfiguration = () => (
     <div className="config-section">
-      <div className="card">
-        <h3>Current Configuration</h3>
+      <Card title="Current Configuration">
         <div className="config-item">
           <strong>Credentials Configured:</strong> 
           <span className={gmailConfig?.credentials_configured ? 'text-success' : 'text-error'}>
@@ -205,25 +193,23 @@ const GmailPage = () => {
             ))}
           </ul>
         </div>
-      </div>
+      </Card>
       
       {!gmailConfig?.credentials_configured && (
-        <div className="card setup-instructions">
-          <h3>Setup Instructions</h3>
+        <Card title="Setup Instructions" className="setup-instructions">
           <ol>
             <li>Run <code>python backend/setup_gmail.py</code> to configure OAuth2 credentials</li>
             <li>Follow the prompts to authorize your Gmail account</li>
             <li>Refresh this page to verify the connection</li>
           </ol>
-        </div>
+        </Card>
       )}
     </div>
   );
 
   const renderMessages = () => (
-    <div className="messages-section">
-      <div className="messages-header">
-        <h3>Recent Messages ({messages.length})</h3>
+    <Card title={`Recent Messages (${messages.length})`} className="messages-section">
+      <div className="table-actions">
         <button onClick={fetchMessages} className="btn btn-secondary">
           Refresh
         </button>
@@ -247,17 +233,14 @@ const GmailPage = () => {
             </div>
           </div>
         ))}
-        {messages.length === 0 && (
-          <p className="no-data">No messages found</p>
-        )}
+        {messages.length === 0 && <p className="no-data">No messages found</p>}
       </div>
-    </div>
+    </Card>
   );
 
   const renderLogs = () => (
-    <div className="logs-section">
-      <div className="logs-header">
-        <h3>Execution Logs ({logs.length})</h3>
+    <Card title={`Execution Logs (${logs.length})`} className="logs-section">
+      <div className="table-actions">
         <button onClick={fetchLogs} className="btn btn-secondary">
           Refresh
         </button>
@@ -274,77 +257,51 @@ const GmailPage = () => {
               </span>
             </div>
             <div className="log-details">
-              {log.result.processed !== undefined && (
-                <span>Processed: {log.result.processed}</span>
-              )}
-              {log.result.skipped !== undefined && (
-                <span>Skipped: {log.result.skipped}</span>
-              )}
-              {log.result.total_found !== undefined && (
-                <span>Found: {log.result.total_found}</span>
-              )}
-              {log.result.message && (
-                <span className="error-message">Error: {log.result.message}</span>
-              )}
+              {log.result.processed !== undefined && <span>Processed: {log.result.processed}</span>}
+              {log.result.skipped !== undefined && <span>Skipped: {log.result.skipped}</span>}
+              {log.result.total_found !== undefined && <span>Found: {log.result.total_found}</span>}
+              {log.result.message && <span className="error-message">Error: {log.result.message}</span>}
             </div>
           </div>
         ))}
-        {logs.length === 0 && (
-          <p className="no-data">No logs found</p>
-        )}
+        {logs.length === 0 && <p className="no-data">No logs found</p>}
       </div>
-    </div>
+    </Card>
   );
 
   return (
-    <Layout>
-      <div className="gmail-page">
-        <div className="page-header">
-          <h1>Gmail Integration</h1>
-          <p>Manage automated email fetching and monitoring</p>
+    <Layout
+      title="Gmail Integration"
+      subtitle="Manage automated email fetching and monitoring"
+    >
+      {error && (
+        <div className="error-banner">
+          {error}
+          <button onClick={() => setError(null)} className="close-btn">×</button>
         </div>
+      )}
 
-        {error && (
-          <div className="error-banner">
-            {error}
-            <button onClick={() => setError(null)} className="close-btn">×</button>
-          </div>
-        )}
+      <div className="tabs">
+        <button className={`tab ${activeTab === 'overview' ? 'active' : ''}`} onClick={() => setActiveTab('overview')}>
+          Overview
+        </button>
+        <button className={`tab ${activeTab === 'config' ? 'active' : ''}`} onClick={() => setActiveTab('config')}>
+          Configuration
+        </button>
+        <button className={`tab ${activeTab === 'messages' ? 'active' : ''}`} onClick={() => setActiveTab('messages')}>
+          Messages
+        </button>
+        <button className={`tab ${activeTab === 'logs' ? 'active' : ''}`} onClick={() => setActiveTab('logs')}>
+          Logs
+        </button>
+      </div>
 
-        <div className="tabs">
-          <button 
-            className={`tab ${activeTab === 'overview' ? 'active' : ''}`}
-            onClick={() => setActiveTab('overview')}
-          >
-            Overview
-          </button>
-          <button 
-            className={`tab ${activeTab === 'config' ? 'active' : ''}`}
-            onClick={() => setActiveTab('config')}
-          >
-            Configuration
-          </button>
-          <button 
-            className={`tab ${activeTab === 'messages' ? 'active' : ''}`}
-            onClick={() => setActiveTab('messages')}
-          >
-            Messages
-          </button>
-          <button 
-            className={`tab ${activeTab === 'logs' ? 'active' : ''}`}
-            onClick={() => setActiveTab('logs')}
-          >
-            Logs
-          </button>
-        </div>
-
-        <div className="tab-content">
-          {loading && <div className="loading">Loading...</div>}
-          {activeTab === 'overview' && renderOverview()}
-          {activeTab === 'config' && renderConfiguration()}
-          {activeTab === 'messages' && renderMessages()}
-          {activeTab === 'logs' && renderLogs()}
-        </div>
+      <div className="tab-content">
+        {loading && <div className="loading-overlay">Loading...</div>}
+        {activeTab === 'overview' && renderOverview()}
+        {activeTab === 'config' && renderConfiguration()}
+        {activeTab === 'messages' && renderMessages()}
+        {activeTab === 'logs' && renderLogs()}
       </div>
     </Layout>
   );

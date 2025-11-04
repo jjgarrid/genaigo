@@ -1,7 +1,21 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --primary-bg: #F9FAFB;
+  --sidebar-bg: #111827;
+  --sidebar-link: #D1D5DB;
+  --sidebar-link-hover: #1F2937;
+  --sidebar-link-active: #374151;
+  --text-primary: #1F2937;
+  --text-secondary: #6B7280;
+  --border-color: #E5E7EB;
+}
+
 body, html, #root {
   height: 100%;
   margin: 0;
   padding: 0;
-  font-family: 'Segoe UI', Arial, sans-serif;
-  background: #f7f9fb;
+  font-family: 'Inter', sans-serif;
+  background-color: var(--primary-bg);
+  color: var(--text-primary);
 }
