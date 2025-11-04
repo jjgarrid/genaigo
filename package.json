@@ -15,7 +15,13 @@
   "devDependencies": {
     "concurrently": "^7.6.0"
   },
-  "keywords": ["gmail", "integration", "fastapi", "react", "automation"],
+  "keywords": [
+    "gmail",
+    "integration",
+    "fastapi",
+    "react",
+    "automation"
+  ],
   "author": "GenAI Go Team",
   "license": "MIT"
 }

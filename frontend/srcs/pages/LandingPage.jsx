@@ -3,7 +3,7 @@ import Layout from '../components/Layout';
 
 const LandingPage = () => {
   return (
-    <Layout 
+    <Layout
       title="Welcome to Genaigo"
       subtitle="Your intelligent data retrieval platform."
     >

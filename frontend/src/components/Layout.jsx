@@ -1,16 +1,20 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import TopMenu from './TopMenu';
+import Sidebar from './Sidebar';
 import './Layout.css';
 
 const Layout = ({ children, title, subtitle }) => {
   return (
     <div className="layout-root">
-      <TopMenu />
+      <Sidebar />
       <main className="main-content">
-        {title && <h1>{title}</h1>}
-        {subtitle && <p>{subtitle}</p>}
-        {children}
+        <div className="page-header">
+          {title && <h1>{title}</h1>}
+          {subtitle && <p className="subtitle">{subtitle}</p>}
+        </div>
+        <div className="content-area">
+          {children}
+        </div>
       </main>
     </div>
   );
