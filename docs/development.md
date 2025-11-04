@@ -1,116 +1,114 @@
 # Development Guide
 
-## Prerequisites
+This guide provides instructions for setting up and running the GenAI Go Email Integration Platform for development purposes.
 
-- Python 3.8+
-- Node.js 16+
-- Gmail account with API access
+## 🚀 Quick Start
 
-## Project Setup
+For a fast and easy setup, use the provided npm scripts from the root directory.
 
-1. Clone the repository
-2. Install backend dependencies:
-   ```bash
-   cd backend
-   pip install -r requirements.txt
-   ```
-3. Install frontend dependencies:
-   ```bash
-   cd frontend
-   npm install
-   ```
-
-## Backend Development
-
-### Directory Structure
-```
-backend/
-├── app/
-│   ├── main.py          # FastAPI application entry point
-│   ├── routes/          # API route definitions
-│   └── services/        # Business logic
-├── requirements.txt     # Python dependencies
-└── setup_gmail.py       # Gmail OAuth setup utility
+### 1. Install All Dependencies
+This command installs both backend (pip) and frontend (npm) dependencies.
+```bash
+npm run setup
 ```
 
-### Running the Backend
+### 2. Run Both Servers
+This command starts both the backend and frontend servers concurrently.
+```bash
+npm run start:dev
+```
+-   **Backend** will be available at `http://localhost:8000`
+-   **Frontend** will be available at `http://localhost:5173`
+
+## 📋 Prerequisites
+
+-   **Python 3.8+** with `pip`
+-   **Node.js 16+** with `npm`
+-   A **Gmail account** with API access enabled.
+
+## ⚙️ Configuration
+
+Before running the application, you must configure the Gmail API and fetcher settings.
+
+### 1. Gmail API Setup
+Run the guided OAuth2 setup script:
+```bash
+npm run setup:gmail
+```
+This script will:
+-   Guide you through creating Google Cloud credentials.
+-   Handle the OAuth2 authorization flow.
+-   Save the final credentials to `config/gmail.json`.
+
+### 2. Fetcher Settings
+Edit `config/fetcherSettings.json` to control the email fetching behavior:
+```json
+{
+  "sender_whitelist": [
+    "your-sender@example.com"
+  ],
+  "schedule": "0 2 * * *",
+  "enabled": true,
+  "lookback_hours": 24
+}
+```
+
+## 🔧 Manual Server Management
+
+If you prefer to run the servers individually:
+
+### Backend Server
+```bash
+# From the root directory
+npm run backend
+```
+Or manually:
 ```bash
 cd backend
-python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-### Code Structure
-- `main.py` initializes the FastAPI app and includes routers
-- `routes/` contains API endpoint definitions
-- `services/` contains business logic (Gmail fetcher, scheduler)
-
-## Frontend Development
-
-### Directory Structure
+### Frontend Server
+```bash
+# From the root directory
+npm run frontend
 ```
-frontend/
-├── src/
-│   ├── pages/           # Page components
-│   ├── components/      # Reusable components
-│   ├── contexts/        # React contexts
-│   ├── config/          # Configuration files
-│   └── App.jsx          # Main application component
-├── package.json         # Dependencies and scripts
-└── vite.config.js       # Vite configuration
-```
-
-### Running the Frontend
+Or manually:
 ```bash
 cd frontend
 npm run dev
 ```
 
-### Code Structure
-- `App.jsx` defines the main application routes
-- `pages/` contains the main page components
-- `components/` contains reusable UI components
-- `contexts/` contains React context providers
-- `config/` contains configuration files
+## 🧪 Testing
 
-## Testing
-
-### Backend Tests
-Run the Gmail integration test suite:
+### Automated Tests
+Run the Python-based Gmail integration test suite:
 ```bash
-cd backend
-python ../test_gmail_integration.py
+npm run test
 ```
+This script executes `test_gmail_integration.py` to validate the backend functionality.
 
 ### Manual Testing
-1. Start both backend and frontend servers
-2. Access the frontend at http://localhost:5173
-3. Navigate to the Gmail page to check integration status
-4. Use the API documentation at http://localhost:8000/docs for direct API testing
+1.  **Web Interface**: Access the frontend at `http://localhost:5173` to interact with the application.
+2.  **API Docs**: Use the interactive Swagger UI at `http://localhost:8000/docs` to test API endpoints directly.
+3.  **Standalone Dashboard**: Open `gmail_dashboard.html` in a browser for a simple, dependency-free interface to test the backend.
 
-## Adding New Features
+## 📁 Project Structure
 
-### Backend
-1. Add new routes in `backend/app/routes/`
-2. Implement business logic in `backend/app/services/`
-3. Update API documentation in `docs/api.md`
+For a detailed breakdown of the project structure, refer to the [Architecture Documentation](architecture.md).
 
-### Frontend
-1. Add new pages in `frontend/src/pages/`
-2. Create reusable components in `frontend/src/components/`
-3. Update routing in `frontend/src/App.jsx`
+## 🎨 Code Style
 
-## Code Style
+### Python (Backend)
+-   Follow **PEP 8** guidelines for code formatting.
+-   Use type hints for function signatures.
+-   Write clear docstrings for all public modules, classes, and functions.
 
-### Python
-- Follow PEP 8 guidelines
-- Use type hints where possible
-- Write docstrings for public functions and classes
+### JavaScript/React (Frontend)
+-   Follow the **Airbnb JavaScript style guide**.
+-   Use functional components with React Hooks.
+-   Write JSDoc comments for complex functions and components.
 
-### JavaScript/React
-- Follow Airbnb JavaScript style guide
-- Use functional components with hooks
-- Write JSDoc comments for complex functions
+## 🚢 Deployment
 
-## Deployment
-
-See the [Deployment Guide](deployment.md) for detailed deployment instructions.
+For instructions on deploying the application to a production environment, see the [Deployment Guide](deployment.md).
